@@ -34,7 +34,14 @@ export function getDeviceId(): string {
     const KEY = 'kitchenflow_device_id';
     let deviceId = localStorage.getItem(KEY);
     if (!deviceId) {
-        deviceId = `web_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+        // Use crypto.randomUUID() for valid UUID generation
+        if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+            deviceId = crypto.randomUUID();
+        } else {
+            // Fallback for older browsers (unlikely) - simple random string
+            // Note: This might still fail if DB strictly requires UUID type
+            deviceId = `web_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+        }
         localStorage.setItem(KEY, deviceId);
     }
     return deviceId;

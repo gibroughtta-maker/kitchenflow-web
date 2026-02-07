@@ -1,9 +1,9 @@
 import { useNavigate } from 'react-router-dom';
 
 const navItems: { path: string; label: string; sub: string; icon: string; iconGradient: string }[] = [
-  { path: '/cravings', label: '想吃清单', sub: 'Cravings', icon: 'ramen_dining', iconGradient: 'bg-gradient-to-br from-orange-400 to-red-500 shadow-lg shadow-orange-500/20' },
-  { path: '/inventory', label: '库存', sub: 'Inventory', icon: 'inventory_2', iconGradient: 'bg-gradient-to-br from-blue-400 to-indigo-500 shadow-lg shadow-blue-500/20' },
-  { path: '/shopping', label: '购物清单', sub: 'Shopping List', icon: 'shopping_cart', iconGradient: 'bg-gradient-to-br from-emerald-400 to-teal-500 shadow-lg shadow-emerald-500/20' },
+  { path: '/cravings', label: 'Cravings', sub: 'Queue', icon: 'ramen_dining', iconGradient: 'bg-gradient-to-br from-orange-400 to-red-500 shadow-lg shadow-orange-500/20' },
+  { path: '/inventory', label: 'Inventory', sub: 'Stock', icon: 'inventory_2', iconGradient: 'bg-gradient-to-br from-blue-400 to-indigo-500 shadow-lg shadow-blue-500/20' },
+  { path: '/shopping', label: 'Shopping List', sub: 'To Buy', icon: 'shopping_cart', iconGradient: 'bg-gradient-to-br from-emerald-400 to-teal-500 shadow-lg shadow-emerald-500/20' },
 ];
 
 export default function NavigationDrawer({
@@ -43,7 +43,6 @@ export default function NavigationDrawer({
           <div className="relative z-10 flex flex-col h-full px-8 py-12">
             <div className="flex flex-col mb-10 pl-2">
               <h1 className="text-3xl font-bold text-white tracking-tight drop-shadow-sm">KitchenFlow</h1>
-              <p className="text-white/60 text-xs mt-1 font-medium tracking-wide pl-0.5 uppercase">Liquid Assistant</p>
             </div>
 
             <nav className="flex-1 space-y-6">

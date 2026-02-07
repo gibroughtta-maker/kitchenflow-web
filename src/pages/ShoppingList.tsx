@@ -583,7 +583,7 @@ export default function ShoppingList() {
         <NewCravingSlider
           onCravingIdentified={addItem}
           title="Add Items"
-          subtitle="牛奶、鸡蛋... 在Asda买苹果"
+          subtitle="Milk, Eggs... Buy apples at Asda"
           variant="dark"
           className="relative w-full z-10"
           skipImageGeneration={true}

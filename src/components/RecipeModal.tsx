@@ -143,7 +143,7 @@ export default function RecipeModal({
                 className="w-full py-4 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-400 hover:to-blue-500 rounded-2xl font-bold text-white shadow-lg shadow-blue-500/30 transition-all active:scale-95 flex items-center justify-center gap-2"
               >
                 <span className="material-symbols-outlined text-lg">shopping_cart</span>
-                缺失食材加入购物清单
+                Add missing ingredients to shopping list
               </button>
               {error && (
                 <p className="text-blue-400 text-sm text-center mt-2 font-medium animate-pulse" role="alert">{error}</p>

@@ -37,9 +37,19 @@ export async function getOrCreateDevice(): Promise<string> {
     }
 
     // Create new device
+    // Use crypto.randomUUID() if available, otherwise fallback
+    const newId = crypto.randomUUID ? crypto.randomUUID() : `web-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+
+    // Note: If the database requires UUID, the fallback might still fail if it's not a valid UUID.
+    // Ideally we should use a proper UUID library, but for modern browsers crypto.randomUUID is sufficient.
+
     const { data: newDevice, error: createError } = await supabase
         .from('devices')
         .insert({
+            // If the table is set to generate UUIDs automatically, we might not need to pass ID.
+            // But if we want to store it in localStorage immediately, we can generate it here.
+            // Let's try letting Supabase generate it if possible, OR send a valid UUID.
+            // Looking at the error, it seems we were sending a string that wasn't a UUID.
             nickname: `Web Device - ${new Date().toLocaleDateString()}`
         })
         .select('id')

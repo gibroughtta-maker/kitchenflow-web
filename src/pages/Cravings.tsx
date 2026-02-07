@@ -233,8 +233,8 @@ export default function Cravings() {
                 <div
                   onClick={(e) => toggleSelection(craving.id, e)}
                   className={`absolute top-2 left-2 z-10 w-7 h-7 rounded-full flex items-center justify-center transition-all cursor-pointer shadow-lg ${selectedIds.has(craving.id)
-                      ? 'bg-blue-500'
-                      : 'bg-black/60 backdrop-blur-sm hover:bg-white/20'
+                    ? 'bg-blue-500'
+                    : 'bg-black/60 backdrop-blur-sm hover:bg-white/20'
                     }`}
                 >
                   <span className="material-symbols-outlined text-white text-[14px]">
@@ -282,12 +282,12 @@ export default function Cravings() {
               {batchLoading ? (
                 <>
                   <span className="material-symbols-outlined animate-spin text-lg">progress_activity</span>
-                  处理中…
+                  Processing...
                 </>
               ) : (
                 <>
                   <span className="material-symbols-outlined text-lg">shopping_cart</span>
-                  将 {selectedIds.size} 道菜的食材加入购物清单
+                  Add ingredients for {selectedIds.size} dishes to shopping list
                 </>
               )}
             </button>
