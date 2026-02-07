@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import NavigationDrawer from './NavigationDrawer';
 
@@ -11,19 +11,58 @@ const titles: Record<string, string> = {
   '/inventory': '库存',
 };
 
+import { useCamera } from '../contexts/CameraContext';
+
 export default function Layout({ children }: { children: React.ReactNode }) {
   const location = useLocation();
   const navigate = useNavigate();
+  const { isCameraActive } = useCamera(); // 获取相机状态
   const path = location.pathname;
   const title = titles[path] ?? 'KitchenFlow';
   const isHome = path === '/';
   const [drawerOpen, setDrawerOpen] = useState(false);
-
   const scrollBottomPadding = path === '/scan-results' ? 'pb-44' : 'pb-8';
 
+  // Gesture Logic - Use refs to avoid re-renders during swipe
+  const touchStart = useRef<number | null>(null);
+  const touchEnd = useRef<number | null>(null);
+
+  // Minimum swipe distance
+  const minSwipeDistance = 50;
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    touchEnd.current = null;
+    touchStart.current = e.targetTouches[0].clientX;
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    touchEnd.current = e.targetTouches[0].clientX;
+  };
+
+  const onTouchEnd = () => {
+    if (!touchStart.current || !touchEnd.current) return;
+    const distance = touchStart.current - touchEnd.current;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+
+    if (isRightSwipe) {
+      setDrawerOpen(true);
+    }
+
+    if (isLeftSwipe && drawerOpen) {
+      setDrawerOpen(false);
+    }
+  };
+
   return (
-    <div className="immersive-bg fixed inset-0 min-h-[100dvh]">
-      <div className="immersive-overlay absolute inset-0 z-0" />
+    <div
+      className={`fixed inset-0 min-h-[100dvh] touch-pan-y transition-colors duration-300 ${isCameraActive ? 'bg-transparent' : 'immersive-bg'}`}
+      onTouchStart={onTouchStart}
+      onTouchMove={onTouchMove}
+      onTouchEnd={onTouchEnd}
+    >
+      {/* 只有在相机关闭时才显示背景遮罩 */}
+      {!isCameraActive && <div className="immersive-overlay absolute inset-0 z-0" />}
       <div
         className={`relative z-10 flex min-h-full w-full flex-col overflow-y-auto overflow-x-hidden no-scrollbar ${scrollBottomPadding}`}
       >
@@ -32,16 +71,16 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             /* 首页：药丸栏（网格 + 标题 + 右侧占位）*/
             <div className="flex flex-1 justify-center w-full px-6">
               <div className="flex flex-1 max-w-[340px] items-center justify-between gap-3 glass-panel-thick !bg-black/30 !backdrop-blur-xl !border-white/10 rounded-full px-5 py-3 shadow-lg">
-              <button
-                type="button"
-                onClick={() => setDrawerOpen(true)}
-                className="p-1 rounded-full text-glass-primary hover:bg-white/10 active:scale-90 transition-colors transition-transform duration-200"
-                aria-label="打开菜单"
-              >
-                <span className="material-symbols-outlined text-white text-[24px]">grid_view</span>
-              </button>
-              <span className="text-white font-bold tracking-wide text-base flex-1 text-center">KitchenFlow</span>
-              <div className="w-8 shrink-0" aria-hidden />
+                <button
+                  type="button"
+                  onClick={() => setDrawerOpen(true)}
+                  className="p-1 rounded-full text-glass-primary hover:bg-white/10 active:scale-90 transition-colors transition-transform duration-200"
+                  aria-label="打开菜单"
+                >
+                  <span className="material-symbols-outlined text-white text-[24px]">grid_view</span>
+                </button>
+                <span className="text-white font-bold tracking-wide text-base flex-1 text-center">KitchenFlow</span>
+                <div className="w-8 shrink-0" aria-hidden />
               </div>
             </div>
           ) : (

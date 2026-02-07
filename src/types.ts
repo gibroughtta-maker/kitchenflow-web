@@ -5,7 +5,7 @@ export interface FreshItem {
   freshness: 'fresh' | 'use-soon' | 'priority';
   confidence: number;
   visualNotes?: string;
-  storageLocation?: 'fridge' | 'freezer' | 'pantry' | 'other';
+  storageLocation?: 'fridge' | 'freezer' | 'pantry' | string;
 }
 
 export interface FridgeSnapshotResult {
@@ -37,6 +37,7 @@ export interface ShoppingItem {
   quantity?: string;
   checked: boolean;
   addedAt: number;
+  store?: string; // Target store for this item (AI classified or user specified)
 }
 
 export interface InventoryItem {
@@ -45,6 +46,6 @@ export interface InventoryItem {
   quantity: number;
   unit: string;
   freshness: FreshItem['freshness'];
-  location: 'fridge' | 'freezer' | 'pantry';
+  location: 'fridge' | 'freezer' | 'pantry' | string;
   addedAt: number;
 }

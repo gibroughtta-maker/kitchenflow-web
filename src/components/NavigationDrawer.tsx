@@ -1,10 +1,9 @@
 import { useNavigate } from 'react-router-dom';
 
 const navItems: { path: string; label: string; sub: string; icon: string; iconGradient: string }[] = [
-  { path: '/', label: '首页', sub: 'Home', icon: 'home', iconGradient: 'bg-gradient-to-br from-slate-400 to-slate-600 shadow-lg shadow-slate-500/20' },
-  { path: '/cravings', label: '想吃清单', sub: 'Cravings', icon: 'ramen_dining', iconGradient: 'bg-gradient-to-br from-orange-400 to-red-500 shadow-lg shadow-orange-500/20' },
-  { path: '/inventory', label: '库存', sub: 'Inventory', icon: 'inventory_2', iconGradient: 'bg-gradient-to-br from-blue-400 to-indigo-500 shadow-lg shadow-blue-500/20' },
-  { path: '/shopping', label: '购物清单', sub: 'Shopping List', icon: 'shopping_cart', iconGradient: 'bg-gradient-to-br from-emerald-400 to-teal-500 shadow-lg shadow-emerald-500/20' },
+  { path: '/cravings', label: 'Cravings', sub: 'Queue', icon: 'ramen_dining', iconGradient: 'bg-gradient-to-br from-orange-400 to-red-500 shadow-lg shadow-orange-500/20' },
+  { path: '/inventory', label: 'Inventory', sub: 'Stock', icon: 'inventory_2', iconGradient: 'bg-gradient-to-br from-blue-400 to-indigo-500 shadow-lg shadow-blue-500/20' },
+  { path: '/shopping', label: 'Shopping List', sub: 'To Buy', icon: 'shopping_cart', iconGradient: 'bg-gradient-to-br from-emerald-400 to-teal-500 shadow-lg shadow-emerald-500/20' },
 ];
 
 export default function NavigationDrawer({
@@ -25,16 +24,14 @@ export default function NavigationDrawer({
     <>
       <div
         role="presentation"
-        className={`fixed inset-0 z-[60] bg-black/40 backdrop-blur-md transition-opacity duration-500 ease-in-out ${
-          isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
-        }`}
+        className={`fixed inset-0 z-[60] bg-black/40 backdrop-blur-md transition-opacity duration-500 ease-in-out ${isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+          }`}
         onClick={onClose}
         aria-hidden={!isOpen}
       />
       <div
-        className={`fixed top-0 left-0 h-full w-[85%] max-w-[320px] z-[70] transition-transform duration-500 ease-drawer ${
-          isOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}
+        className={`fixed top-0 left-0 h-full w-[85%] max-w-[320px] z-[70] transition-transform duration-500 ease-drawer ${isOpen ? 'translate-x-0' : '-translate-x-full'
+          }`}
         aria-modal="true"
         aria-label="主导航"
         hidden={!isOpen}
@@ -46,7 +43,6 @@ export default function NavigationDrawer({
           <div className="relative z-10 flex flex-col h-full px-8 py-12">
             <div className="flex flex-col mb-10 pl-2">
               <h1 className="text-3xl font-bold text-white tracking-tight drop-shadow-sm">KitchenFlow</h1>
-              <p className="text-white/60 text-xs mt-1 font-medium tracking-wide pl-0.5 uppercase">Liquid Assistant</p>
             </div>
 
             <nav className="flex-1 space-y-6">
