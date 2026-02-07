@@ -5,6 +5,7 @@ const navItems: { path: string; label: string; sub: string; icon: string; iconGr
   { path: '/cravings', label: '想吃清单', sub: 'Cravings', icon: 'ramen_dining', iconGradient: 'bg-gradient-to-br from-orange-400 to-red-500 shadow-lg shadow-orange-500/20' },
   { path: '/inventory', label: '库存', sub: 'Inventory', icon: 'inventory_2', iconGradient: 'bg-gradient-to-br from-blue-400 to-indigo-500 shadow-lg shadow-blue-500/20' },
   { path: '/shopping', label: '购物清单', sub: 'Shopping List', icon: 'shopping_cart', iconGradient: 'bg-gradient-to-br from-emerald-400 to-teal-500 shadow-lg shadow-emerald-500/20' },
+  { path: '/pantry', label: '常备食材', sub: 'Pantry Staples', icon: 'kitchen', iconGradient: 'bg-gradient-to-br from-yellow-400 to-orange-500 shadow-lg shadow-yellow-500/20' },
 ];
 
 export default function NavigationDrawer({
@@ -25,16 +26,14 @@ export default function NavigationDrawer({
     <>
       <div
         role="presentation"
-        className={`fixed inset-0 z-[60] bg-black/40 backdrop-blur-md transition-opacity duration-500 ease-in-out ${
-          isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
-        }`}
+        className={`fixed inset-0 z-[60] bg-black/40 backdrop-blur-md transition-opacity duration-500 ease-in-out ${isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+          }`}
         onClick={onClose}
         aria-hidden={!isOpen}
       />
       <div
-        className={`fixed top-0 left-0 h-full w-[85%] max-w-[320px] z-[70] transition-transform duration-500 ease-drawer ${
-          isOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}
+        className={`fixed top-0 left-0 h-full w-[85%] max-w-[320px] z-[70] transition-transform duration-500 ease-drawer ${isOpen ? 'translate-x-0' : '-translate-x-full'
+          }`}
         aria-modal="true"
         aria-label="主导航"
         hidden={!isOpen}

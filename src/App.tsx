@@ -6,6 +6,7 @@ import ScanResults from './pages/ScanResults';
 import Cravings from './pages/Cravings';
 import ShoppingList from './pages/ShoppingList';
 import Inventory from './pages/Inventory';
+import Pantry from './pages/Pantry';
 
 export default function App() {
   return (
@@ -17,6 +18,7 @@ export default function App() {
         <Route path="/cravings" element={<Cravings />} />
         <Route path="/shopping" element={<ShoppingList />} />
         <Route path="/inventory" element={<Inventory />} />
+        <Route path="/pantry" element={<Pantry />} />
       </Routes>
     </Layout>
   );

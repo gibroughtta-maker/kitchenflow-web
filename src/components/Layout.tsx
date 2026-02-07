@@ -9,6 +9,7 @@ const titles: Record<string, string> = {
   '/cravings': '想吃清单',
   '/shopping': '购物清单',
   '/inventory': '库存',
+  '/pantry': 'Pantry Staples',
 };
 
 export default function Layout({ children }: { children: React.ReactNode }) {
@@ -32,16 +33,16 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             /* 首页：药丸栏（网格 + 标题 + 右侧占位）*/
             <div className="flex flex-1 justify-center w-full px-6">
               <div className="flex flex-1 max-w-[340px] items-center justify-between gap-3 glass-panel-thick !bg-black/30 !backdrop-blur-xl !border-white/10 rounded-full px-5 py-3 shadow-lg">
-              <button
-                type="button"
-                onClick={() => setDrawerOpen(true)}
-                className="p-1 rounded-full text-glass-primary hover:bg-white/10 active:scale-90 transition-colors transition-transform duration-200"
-                aria-label="打开菜单"
-              >
-                <span className="material-symbols-outlined text-white text-[24px]">grid_view</span>
-              </button>
-              <span className="text-white font-bold tracking-wide text-base flex-1 text-center">KitchenFlow</span>
-              <div className="w-8 shrink-0" aria-hidden />
+                <button
+                  type="button"
+                  onClick={() => setDrawerOpen(true)}
+                  className="p-1 rounded-full text-glass-primary hover:bg-white/10 active:scale-90 transition-colors transition-transform duration-200"
+                  aria-label="打开菜单"
+                >
+                  <span className="material-symbols-outlined text-white text-[24px]">grid_view</span>
+                </button>
+                <span className="text-white font-bold tracking-wide text-base flex-1 text-center">KitchenFlow</span>
+                <div className="w-8 shrink-0" aria-hidden />
               </div>
             </div>
           ) : (
