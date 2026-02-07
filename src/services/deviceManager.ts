@@ -38,7 +38,7 @@ export async function getOrCreateDevice(): Promise<string> {
 
     // Create new device
     // Use crypto.randomUUID() if available, otherwise fallback
-    const newId = crypto.randomUUID ? crypto.randomUUID() : `web-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+
 
     // Note: If the database requires UUID, the fallback might still fail if it's not a valid UUID.
     // Ideally we should use a proper UUID library, but for modern browsers crypto.randomUUID is sufficient.
