@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { scanFridge, getInventory } from '../services/api';
 import type { FridgeSnapshotResult } from '../types';
 
@@ -45,6 +45,20 @@ export default function Scan() {
     });
     setError('');
   }, []);
+
+  // Check for captured file from Home camera
+  const location = useLocation();
+  useEffect(() => {
+    const state = location.state as { capturedFile?: File } | null;
+    if (state?.capturedFile) {
+      const file = state.capturedFile;
+      setFiles([file]);
+      setPreviews([URL.createObjectURL(file)]);
+      // Optional: Auto-start scan? Maybe better to let user confirm.
+      // But user context implies "taking a photo", so maybe just showing it is enough for now.
+      // Clear state to avoid re-play? Routes handle this.
+    }
+  }, [location.state]);
 
   const fileToBase64 = (file: File): Promise<{ base64: string; mimeType: string }> => {
     return new Promise((resolve, reject) => {

@@ -3,13 +3,24 @@ import { useCamera } from '../contexts/CameraContext';
 
 export default function Home() {
   const navigate = useNavigate();
-  const { isCameraActive, setIsCameraActive } = useCamera();
+  const { isCameraActive, setIsCameraActive, capturePhoto } = useCamera();
 
-  const handleMainButtonClick = () => {
+  const handleMainButtonClick = async () => {
     if (!isCameraActive) {
       setIsCameraActive(true);
     } else {
-      navigate('/scan');
+      // Capture photo and navigate
+      if (capturePhoto) { // Check if function exists
+        const file = await capturePhoto();
+        if (file) {
+          navigate('/scan', { state: { capturedFile: file } });
+        } else {
+          // Fallback if capture fails (e.g. video not ready)
+          navigate('/scan');
+        }
+      } else {
+        navigate('/scan');
+      }
     }
   };
 

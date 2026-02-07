@@ -11,9 +11,12 @@ const titles: Record<string, string> = {
   '/inventory': '库存',
 };
 
+import { useCamera } from '../contexts/CameraContext';
+
 export default function Layout({ children }: { children: React.ReactNode }) {
   const location = useLocation();
   const navigate = useNavigate();
+  const { isCameraActive } = useCamera(); // 获取相机状态
   const path = location.pathname;
   const title = titles[path] ?? 'KitchenFlow';
   const isHome = path === '/';
@@ -53,12 +56,13 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   return (
     <div
-      className="immersive-bg fixed inset-0 min-h-[100dvh] touch-pan-y"
+      className={`fixed inset-0 min-h-[100dvh] touch-pan-y transition-colors duration-300 ${isCameraActive ? 'bg-transparent' : 'immersive-bg'}`}
       onTouchStart={onTouchStart}
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
     >
-      <div className="immersive-overlay absolute inset-0 z-0" />
+      {/* 只有在相机关闭时才显示背景遮罩 */}
+      {!isCameraActive && <div className="immersive-overlay absolute inset-0 z-0" />}
       <div
         className={`relative z-10 flex min-h-full w-full flex-col overflow-y-auto overflow-x-hidden no-scrollbar ${scrollBottomPadding}`}
       >

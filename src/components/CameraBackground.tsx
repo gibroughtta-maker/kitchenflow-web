@@ -1,7 +1,8 @@
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
+import { useCamera } from '../contexts/CameraContext';
 
 export default function CameraBackground() {
-    const videoRef = useRef<HTMLVideoElement>(null);
+    const { videoRef } = useCamera();
 
     useEffect(() => {
         let stream: MediaStream | null = null;
