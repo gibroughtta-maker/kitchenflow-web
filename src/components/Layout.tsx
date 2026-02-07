@@ -9,6 +9,7 @@ const titles: Record<string, string> = {
   '/cravings': '想吃清单',
   '/shopping': '购物清单',
   '/inventory': '库存',
+  '/pantry': 'Pantry Staples',
 };
 
 import { useCamera } from '../contexts/CameraContext';

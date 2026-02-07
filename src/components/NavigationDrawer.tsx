@@ -1,9 +1,11 @@
 import { useNavigate } from 'react-router-dom';
 
 const navItems: { path: string; label: string; sub: string; icon: string; iconGradient: string }[] = [
-  { path: '/cravings', label: 'Cravings', sub: 'Queue', icon: 'ramen_dining', iconGradient: 'bg-gradient-to-br from-orange-400 to-red-500 shadow-lg shadow-orange-500/20' },
-  { path: '/inventory', label: 'Inventory', sub: 'Stock', icon: 'inventory_2', iconGradient: 'bg-gradient-to-br from-blue-400 to-indigo-500 shadow-lg shadow-blue-500/20' },
-  { path: '/shopping', label: 'Shopping List', sub: 'To Buy', icon: 'shopping_cart', iconGradient: 'bg-gradient-to-br from-emerald-400 to-teal-500 shadow-lg shadow-emerald-500/20' },
+  { path: '/', label: '首页', sub: 'Home', icon: 'home', iconGradient: 'bg-gradient-to-br from-slate-400 to-slate-600 shadow-lg shadow-slate-500/20' },
+  { path: '/cravings', label: '想吃清单', sub: 'Cravings', icon: 'ramen_dining', iconGradient: 'bg-gradient-to-br from-orange-400 to-red-500 shadow-lg shadow-orange-500/20' },
+  { path: '/inventory', label: '库存', sub: 'Inventory', icon: 'inventory_2', iconGradient: 'bg-gradient-to-br from-blue-400 to-indigo-500 shadow-lg shadow-blue-500/20' },
+  { path: '/shopping', label: '购物清单', sub: 'Shopping List', icon: 'shopping_cart', iconGradient: 'bg-gradient-to-br from-emerald-400 to-teal-500 shadow-lg shadow-emerald-500/20' },
+  { path: '/pantry', label: '常备食材', sub: 'Pantry Staples', icon: 'kitchen', iconGradient: 'bg-gradient-to-br from-yellow-400 to-orange-500 shadow-lg shadow-yellow-500/20' },
 ];
 
 export default function NavigationDrawer({
