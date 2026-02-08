@@ -302,39 +302,39 @@ export default function ShoppingList() {
     // Fallback if nothing selected (shouldn't happen given input check)
     if (targetStores.length === 0) targetStores.push('Supermarket');
 
-    // 3. Get User Location
+    // 3. Attempt User Location (but proceed even if it fails)
+    const requestRoute = async (lat?: number, lng?: number) => {
+      try {
+        const result = await getShoppingRoute(
+          targetStores,
+          lat && lng ? { latitude: lat, longitude: lng } : undefined
+        );
+        setRouteResult(result);
+      } catch (e) {
+        console.error('Route planning failed', e);
+        alert('Failed to plan route. Please try again.');
+        setIsRouteModalOpen(false);
+      } finally {
+        setIsRouteLoading(false);
+      }
+    };
+
     if (!navigator.geolocation) {
-      alert('Geolocation is not supported by your browser');
-      setIsRouteModalOpen(false);
+      // Proceed without location
+      requestRoute();
       return;
     }
 
     navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        try {
-          // 4. Call Gemini with Google Maps Tool
-          const result = await getShoppingRoute(
-            targetStores,
-            {
-              latitude: position.coords.latitude,
-              longitude: position.coords.longitude
-            }
-          );
-          setRouteResult(result);
-        } catch (e) {
-          console.error('Route planning failed', e);
-          alert('Failed to plan route. Please try again.');
-          setIsRouteModalOpen(false);
-        } finally {
-          setIsRouteLoading(false);
-        }
+      (position) => {
+        requestRoute(position.coords.latitude, position.coords.longitude);
       },
       (error) => {
-        console.error('Location error', error);
-        alert('Unable to retrieve your location');
-        setIsRouteModalOpen(false);
-        setIsRouteLoading(false);
-      }
+        console.warn('Location retrieval failed', error);
+        // Fallback: Proceed without location
+        requestRoute();
+      },
+      { timeout: 5000 } // Add timeout so it doesn't hang forever
     );
   };
 

@@ -321,15 +321,20 @@ export interface ShoppingRouteResult {
 
 export async function getShoppingRoute(
   stores: string[],
-  userLocation: { latitude: number; longitude: number }
+  userLocation?: { latitude: number; longitude: number }
 ): Promise<ShoppingRouteResult | null> {
   try {
     const storeList = stores.join(', ');
+    const locationContext = userLocation
+      ? `My current location is latitude: ${userLocation.latitude}, longitude: ${userLocation.longitude}.`
+      : 'My current location is unknown (assume starting from User Current Location).';
+
     const prompt = `
       I need to visit these stores: ${storeList}.
-      My current location is latitude: ${userLocation.latitude}, longitude: ${userLocation.longitude}.
+      ${locationContext}
       
       Please find the actual nearest locations for these stores and plan an efficient route using Google Maps.
+      If current location is unknown, create a route link starting from "Current Location".
       
       CRITICAL: You must return the result as a valid JSON object within a markdown code block.
       Format:
@@ -350,21 +355,26 @@ export async function getShoppingRoute(
       \`\`\`
     `;
 
+    const toolConfig: any = {
+      tools: [{ googleMaps: {} }],
+    };
+
+    if (userLocation) {
+      // @ts-ignore - Dynamic config for Google Maps grounding with location bias
+      toolConfig.toolConfig = {
+        retrievalConfig: {
+          latLng: {
+            latitude: userLocation.latitude,
+            longitude: userLocation.longitude
+          }
+        }
+      };
+    }
+
     const response = await getClient().models.generateContent({
       model: 'gemini-2.5-flash',
       contents: { parts: [{ text: prompt }] },
-      config: {
-        tools: [{ googleMaps: {} }], // Enable Google Maps tool
-        // @ts-ignore - Dynamic config for Google Maps grounding with location bias
-        toolConfig: {
-          retrievalConfig: {
-            latLng: {
-              latitude: userLocation.latitude,
-              longitude: userLocation.longitude
-            }
-          }
-        },
-      },
+      config: toolConfig,
     });
 
     const text = response.text;
