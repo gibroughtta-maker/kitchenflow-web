@@ -153,6 +153,16 @@ export async function getInventory(): Promise<import('../types').InventoryItem[]
         .order('added_at', { ascending: false });
 
       if (!error && data) {
+        // [Sync Fix] Migration for Inventory
+        if (data.length === 0) {
+          const localData = storage.getInventory();
+          if (localData.length > 0) {
+            console.log('🚀 Migrating local INVENTORY to Supabase...', localData);
+            await setInventory(localData);
+            return localData;
+          }
+        }
+
         return data.map((item) => ({
           id: item.id,
           name: item.name,
@@ -177,12 +187,38 @@ export async function setInventory(items: import('../types').InventoryItem[]): P
   if (isSupabaseConfigured() && supabase) {
     try {
       const deviceId = getDeviceId();
-      const { error } = await supabase.rpc('save_inventory_items', {
-        p_device_id: deviceId,
-        p_items: items,
-      });
 
-      if (error) throw error;
+      // Strategy: Sync local items to Supabase (Upsert + Delete)
+      // 1. Upsert
+      const { error: upsertError } = await supabase
+        .from('inventory_items')
+        .upsert(
+          items.map(item => ({
+            id: item.id,
+            device_id: deviceId,
+            name: item.name,
+            quantity: item.quantity,
+            unit: item.unit,
+            freshness: item.freshness,
+            location: item.location,
+            added_at: new Date(item.addedAt).toISOString(),
+          }))
+        );
+
+      if (upsertError) throw upsertError;
+
+      // 2. Delete items not in current list
+      const currentIds = items.map(i => i.id);
+      if (currentIds.length > 0) {
+        await supabase
+          .from('inventory_items')
+          .delete()
+          .eq('device_id', deviceId)
+          .not('id', 'in', `(${currentIds.join(',')})`);
+      } else {
+        await supabase.from('inventory_items').delete().eq('device_id', deviceId);
+      }
+
       // Success - no need to fall back
       return;
     } catch (e) {
