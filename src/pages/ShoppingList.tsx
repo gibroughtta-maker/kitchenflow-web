@@ -4,7 +4,7 @@ import { getShoppingList, setShoppingList } from '../services/api';
 import { supabase } from '../services/supabaseClient';
 import type { ShoppingItem } from '../types';
 import NewCravingSlider from '../components/NewCravingSlider';
-import { classifyItemToStore, getStoreIcon, getStoreColor, getStoreUrl, type Store, UK_SUPERMARKETS } from '../services/storeClassifier';
+import { classifyItemToStore, getStoreIcon, getStoreColor, type Store, UK_SUPERMARKETS } from '../services/storeClassifier';
 import { getShoppingRoute, type ShoppingRouteResult } from '../services/gemini';
 import ShoppingRouteModal from '../components/ShoppingRouteModal';
 
