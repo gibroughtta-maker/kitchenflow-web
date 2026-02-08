@@ -1,6 +1,7 @@
 import type { ShoppingItem, InventoryItem } from '../types';
 
 const SHOPPING_KEY = 'kitchenflow-shopping';
+const INVENTORY_KEY = 'kitchenflow-inventory';
 const CRAVINGS_KEY = 'kitchenflow-cravings';
 
 export function getCravings(): import('../types').Craving[] {
