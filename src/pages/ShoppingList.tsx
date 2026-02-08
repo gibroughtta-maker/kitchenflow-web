@@ -247,29 +247,11 @@ export default function ShoppingList() {
     const selectedItems = items.filter(i => i.checked);
     if (selectedItems.length === 0) return;
 
-    // Determine target store
-    // Logic: Find the most frequent store among selected items
-    const storeCounts: Record<string, number> = {};
-    selectedItems.forEach(i => {
-      const s = i.store || 'Any';
-      storeCounts[s] = (storeCounts[s] || 0) + 1;
-    });
-
-    // Sort stores by count
-    const sortedStores = Object.entries(storeCounts).sort((a, b) => b[1] - a[1]);
-    const primaryStore = sortedStores[0][0] as Store;
-
-    // First Principles: Efficiency & Direct Access
-    // 1. User wants to see products/buying options immediately -> Google Shopping (tbm=shop).
-    // 2. Remove complexity (no item count logic).
-    // 3. Query optimization: Search for the *category* of goods to get a wide range of results.
-
-    let searchTerm = '';
-    if (primaryStore === 'Any') {
-      searchTerm = 'groceries'; // Generic
-    } else {
-      searchTerm = primaryStore; // Specialty (e.g., "Chinese Supermarket", "Korean Mart")
-    }
+    // First Principles: Specificity & Core Need
+    // The user's "First Dish" (First Item) is the anchor of the shopping list.
+    // Searching for the specific item on Google Shopping is more useful than searching for a generic store.
+    const firstItem = selectedItems[0];
+    const searchTerm = firstItem.name;
 
     // Construct Google Shopping URL
     // tbm=shop triggers the Shopping tab directly
