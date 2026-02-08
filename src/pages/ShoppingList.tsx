@@ -274,15 +274,7 @@ export default function ShoppingList() {
       }
     }
 
-    // Determine query
-    // If only 1 item, search for it directly
-    // If multiple, just open the store page (can't search multiple at once easily)
-    let query = '';
-    if (selectedItems.length === 1) {
-      query = selectedItems[0].name;
-    }
 
-    const url = getStoreUrl(primaryStore, query);
 
     // Open in new tab
     window.open(url, '_blank');
