@@ -1,12 +1,7 @@
-import { useState } from 'react';
-import type { RecipeDetails } from '../types';
-import { getShoppingList, setShoppingList, getInventory } from '../services/api';
-import type { ShoppingItem } from '../types';
-import { useNavigate } from 'react-router-dom';
 
-function genId() {
-  return `shopping-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
-}
+import type { RecipeDetails } from '../types';
+
+
 
 export default function RecipeModal({
   data,
@@ -17,53 +12,8 @@ export default function RecipeModal({
   image: string;
   onClose: () => void;
 }) {
-  const navigate = useNavigate();
-  const [error, setError] = useState('');
   const ingredients = data.ingredients?.map((i) => i.name) ?? [];
 
-  const addMissingToShopping = async () => {
-    if (!ingredients.length) return;
-    setError('');
-    try {
-      // 1. Get current state of 'Stock' (Inventory) and 'Plan' (Shopping List)
-      const [shoppingList, inventory] = await Promise.all([
-        getShoppingList(),
-        getInventory()
-      ]);
-
-      // 2. Normalize for comparison (lowercase)
-      const inPlan = new Set(shoppingList.map((i) => i.name.toLowerCase()));
-      const inStock = new Set(inventory.map((i) => i.name.toLowerCase()));
-
-      // 3. First Principles: Needed = Required - (In Stock + In Plan)
-      const toAdd: ShoppingItem[] = ingredients
-        .filter((name) => {
-          const lower = name.toLowerCase();
-          // If we have it (Stock) or plan to buy it (Plan), we don't need to add it.
-          const alreadyHave = inStock.has(lower);
-          const alreadyPlanned = inPlan.has(lower);
-
-          return !alreadyHave && !alreadyPlanned;
-        })
-        .map((name) => ({
-          id: genId(),
-          name,
-          checked: false,
-          addedAt: Date.now(),
-        }));
-
-      if (toAdd.length === 0) {
-        setError('所有食材均已在库存或购物清单中 ✅');
-        return;
-      }
-
-      await setShoppingList([...shoppingList, ...toAdd]);
-      onClose();
-      navigate('/shopping');
-    } catch (e) {
-      setError(e instanceof Error ? e.message : '加入购物清单失败，请稍后重试');
-    }
-  };
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 h-full w-full">
@@ -135,21 +85,7 @@ export default function RecipeModal({
             </div>
           )}
 
-          {ingredients.length > 0 && (
-            <>
-              <button
-                type="button"
-                onClick={addMissingToShopping}
-                className="w-full py-4 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-400 hover:to-blue-500 rounded-2xl font-bold text-white shadow-lg shadow-blue-500/30 transition-all active:scale-95 flex items-center justify-center gap-2"
-              >
-                <span className="material-symbols-outlined text-lg">shopping_cart</span>
-                Add missing ingredients to shopping list
-              </button>
-              {error && (
-                <p className="text-blue-400 text-sm text-center mt-2 font-medium animate-pulse" role="alert">{error}</p>
-              )}
-            </>
-          )}
+
         </div>
       </div>
     </div>
