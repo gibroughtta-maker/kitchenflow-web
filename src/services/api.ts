@@ -15,13 +15,14 @@ function useBackend(): boolean {
 }
 
 // Cache for list_id to avoid repeated initialization
-let cachedListId: string | null = null;
+// Cache for list_id to avoid repeated initialization
+// let cachedListId: string | null = null;
 
-async function getListId(): Promise<string> {
-  if (cachedListId) return cachedListId;
-  cachedListId = await initializeDevice();
-  return cachedListId;
-}
+// async function getListId(): Promise<string> {
+//   if (cachedListId) return cachedListId;
+//   cachedListId = await initializeDevice();
+//   return cachedListId;
+// }
 
 // --- 想吃 / 食谱 / 扫描（与 gemini 同签名）---
 
