@@ -28,27 +28,35 @@ export function isSupabaseConfigured(): boolean {
 }
 
 /**
+ * Generate a standard UUID v4
+ */
+export function generateUUID(): string {
+    if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+        return crypto.randomUUID();
+    }
+    // Fallback for environments without crypto.randomUUID
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+        var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+    });
+}
+
+/**
+ * Validate if a string is a valid UUID
+ */
+export function isUUID(str: string): boolean {
+    return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
+}
+
+/**
  * 获取或生成设备 ID（用于数据隔离）
  */
 export function getDeviceId(): string {
     const KEY = 'kitchenflow_device_id';
     let deviceId = localStorage.getItem(KEY);
 
-    // Validate if existing ID is a UUID (simple check)
-    const isUUID = (str: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
-
     if (!deviceId || !isUUID(deviceId)) {
-        // Use crypto.randomUUID() for valid UUID generation
-        if (typeof crypto !== 'undefined' && crypto.randomUUID) {
-            deviceId = crypto.randomUUID();
-        } else {
-            // Fallback for environments without crypto.randomUUID (e.g. older browsers/test)
-            // RFC4122 version 4 compliant UUID generator
-            deviceId = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-                var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
-                return v.toString(16);
-            });
-        }
+        deviceId = generateUUID();
         localStorage.setItem(KEY, deviceId);
     }
     return deviceId;

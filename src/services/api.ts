@@ -7,7 +7,7 @@ import * as gemini from './gemini';
 import * as storage from './storage';
 import * as backendApi from './backendApi';
 
-import { supabase, isSupabaseConfigured, getDeviceId } from './supabaseClient';
+import { supabase, isSupabaseConfigured, getDeviceId, generateUUID, isUUID } from './supabaseClient';
 import { initializeDevice } from './deviceManager';
 
 function useBackend(): boolean {
@@ -94,6 +94,21 @@ export async function getShoppingList(): Promise<import('../types').ShoppingItem
 }
 
 export async function setShoppingList(items: import('../types').ShoppingItem[]): Promise<void> {
+  // [Fix] Ensure all items have valid UUIDs before syncing
+  // This migrates legacy timestamp-based IDs to UUIDs
+  let hasChanges = false;
+  const sanitizedItems = items.map(item => {
+    if (!item.id || !isUUID(item.id)) {
+      hasChanges = true;
+      return { ...item, id: generateUUID() };
+    }
+    return item;
+  });
+
+  if (hasChanges) {
+    console.log('Sanitized items with new UUIDs:', sanitizedItems);
+  }
+
   // 1. 优先直连 Supabase (Sync)
   if (isSupabaseConfigured() && supabase) {
     try {
@@ -104,7 +119,7 @@ export async function setShoppingList(items: import('../types').ShoppingItem[]):
       const { error: upsertError } = await supabase
         .from('shopping_items')
         .upsert(
-          items.map(item => ({
+          sanitizedItems.map(item => ({
             id: item.id,
             list_id: listId,
             name: item.name,
@@ -118,7 +133,7 @@ export async function setShoppingList(items: import('../types').ShoppingItem[]):
       if (upsertError) throw upsertError;
 
       // 2. Delete items not in current list
-      const currentIds = items.map(i => i.id);
+      const currentIds = sanitizedItems.map(i => i.id);
       if (currentIds.length > 0) {
         await supabase
           .from('shopping_items')
@@ -126,7 +141,6 @@ export async function setShoppingList(items: import('../types').ShoppingItem[]):
           .eq('list_id', listId)
           .not('id', 'in', `(${currentIds.join(',')})`);
       } else {
-        // If list is empty, delete all
         await supabase.from('shopping_items').delete().eq('list_id', listId);
       }
 
@@ -135,8 +149,9 @@ export async function setShoppingList(items: import('../types').ShoppingItem[]):
     }
   }
 
-  if (useBackend()) return backendApi.setShoppingList(items);
-  storage.setShoppingList(items);
+  // Update local storage with the sanitized identifiers so we are consistent
+  if (useBackend()) return backendApi.setShoppingList(sanitizedItems);
+  storage.setShoppingList(sanitizedItems);
 }
 
 // --- 库存（优先直连 Supabase）---
@@ -183,6 +198,20 @@ export async function getInventory(): Promise<import('../types').InventoryItem[]
 }
 
 export async function setInventory(items: import('../types').InventoryItem[]): Promise<void> {
+  // [Fix] Ensure all items have valid UUIDs
+  let hasChanges = false;
+  const sanitizedItems = items.map(item => {
+    if (!item.id || !isUUID(item.id)) {
+      hasChanges = true;
+      return { ...item, id: generateUUID() };
+    }
+    return item;
+  });
+
+  if (hasChanges) {
+    console.log('Sanitized INVENTORY items with new UUIDs:', sanitizedItems);
+  }
+
   // 1. 优先直连 Supabase
   if (isSupabaseConfigured() && supabase) {
     try {
@@ -193,7 +222,7 @@ export async function setInventory(items: import('../types').InventoryItem[]): P
       const { error: upsertError } = await supabase
         .from('inventory_items')
         .upsert(
-          items.map(item => ({
+          sanitizedItems.map(item => ({
             id: item.id,
             device_id: deviceId,
             name: item.name,
@@ -208,7 +237,7 @@ export async function setInventory(items: import('../types').InventoryItem[]): P
       if (upsertError) throw upsertError;
 
       // 2. Delete items not in current list
-      const currentIds = items.map(i => i.id);
+      const currentIds = sanitizedItems.map(i => i.id);
       if (currentIds.length > 0) {
         await supabase
           .from('inventory_items')
@@ -220,6 +249,8 @@ export async function setInventory(items: import('../types').InventoryItem[]): P
       }
 
       // Success - no need to fall back
+      // BUT we must still update local storage with the sanitized items to persist UUIDs
+      storage.setInventory(sanitizedItems);
       return;
     } catch (e) {
       console.warn('Supabase direct write failed, falling back:', e);
@@ -227,6 +258,6 @@ export async function setInventory(items: import('../types').InventoryItem[]): P
   }
 
   // 2. 降级
-  if (useBackend()) return backendApi.setInventory(items);
-  storage.setInventory(items);
+  if (useBackend()) return backendApi.setInventory(sanitizedItems);
+  storage.setInventory(sanitizedItems);
 }
