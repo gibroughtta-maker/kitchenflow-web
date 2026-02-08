@@ -2,6 +2,7 @@
  * Supabase Client for kitchenflow-web
  * 用于实时订阅和直接读取操作
  */
+console.log('[System] Supabase Connector v2.1 (UUID+Trim) Loaded');
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
