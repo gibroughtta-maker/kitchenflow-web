@@ -8,7 +8,7 @@ import * as storage from './storage';
 import * as backendApi from './backendApi';
 
 import { supabase, isSupabaseConfigured, getDeviceId } from './supabaseClient';
-import { initializeDevice } from './deviceManager';
+// import { initializeDevice } from './deviceManager';
 
 function useBackend(): boolean {
   return isBackendConfigured();
