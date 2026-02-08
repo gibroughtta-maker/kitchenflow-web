@@ -8,7 +8,7 @@ import * as storage from './storage';
 import * as backendApi from './backendApi';
 
 import { supabase, isSupabaseConfigured, getDeviceId } from './supabaseClient';
-// import { initializeDevice } from './deviceManager';
+import { initializeDevice } from './deviceManager';
 
 function useBackend(): boolean {
   return isBackendConfigured();
@@ -16,13 +16,14 @@ function useBackend(): boolean {
 
 // Cache for list_id to avoid repeated initialization
 // Cache for list_id to avoid repeated initialization
-// let cachedListId: string | null = null;
+let cachedListId: string | null = null;
 
-// async function getListId(): Promise<string> {
-//   if (cachedListId) return cachedListId;
-//   cachedListId = await initializeDevice();
-//   return cachedListId;
-// }
+async function getListId(): Promise<string> {
+  if (cachedListId) return cachedListId;
+  const deviceId = await initializeDevice();
+  cachedListId = deviceId || 'unknown_device'; // Fallback if initializeDevice returns void/null
+  return cachedListId;
+}
 
 // --- 想吃 / 食谱 / 扫描（与 gemini 同签名）---
 
@@ -47,8 +48,7 @@ export async function scanFridge(images: { base64: string; mimeType: string }[])
 
 export async function getShoppingList(): Promise<import('../types').ShoppingItem[]> {
   // 1. 优先直连 Supabase (使用 list_id)
-  // 1. 优先直连 Supabase - TEMPORARY DISABLED: Enable only when setShoppingList supports Supabase
-  /*
+  // 1. 优先直连 Supabase
   if (isSupabaseConfigured() && supabase) {
     try {
       const listId = await getListId();
@@ -72,13 +72,53 @@ export async function getShoppingList(): Promise<import('../types').ShoppingItem
       console.warn('Supabase direct read failed, falling back:', e);
     }
   }
-  */
 
   // 2. 降级到 API 或本地
   return useBackend() ? backendApi.getShoppingList() : Promise.resolve(storage.getShoppingList());
 }
 
 export async function setShoppingList(items: import('../types').ShoppingItem[]): Promise<void> {
+  // 1. 优先直连 Supabase (Sync)
+  if (isSupabaseConfigured() && supabase) {
+    try {
+      const listId = await getListId();
+
+      // Strategy: Sync local items to Supabase
+      // 1. Upsert all current items
+      const { error: upsertError } = await supabase
+        .from('shopping_items')
+        .upsert(
+          items.map(item => ({
+            id: item.id,
+            list_id: listId,
+            name: item.name,
+            quantity: item.quantity || '1',
+            checked: item.checked,
+            created_at: new Date(item.addedAt).toISOString(),
+            store_id: item.store || null
+          }))
+        );
+
+      if (upsertError) throw upsertError;
+
+      // 2. Delete items not in current list
+      const currentIds = items.map(i => i.id);
+      if (currentIds.length > 0) {
+        await supabase
+          .from('shopping_items')
+          .delete()
+          .eq('list_id', listId)
+          .not('id', 'in', `(${currentIds.join(',')})`);
+      } else {
+        // If list is empty, delete all
+        await supabase.from('shopping_items').delete().eq('list_id', listId);
+      }
+
+    } catch (e) {
+      console.warn('Supabase direct write failed:', e);
+    }
+  }
+
   if (useBackend()) return backendApi.setShoppingList(items);
   storage.setShoppingList(items);
 }
