@@ -4,7 +4,7 @@ import { getShoppingList, setShoppingList } from '../services/api';
 import { supabase } from '../services/supabaseClient';
 import type { ShoppingItem } from '../types';
 import NewCravingSlider from '../components/NewCravingSlider';
-import { classifyItemToStore, getStoreIcon, getStoreColor, type Store, UK_SUPERMARKETS } from '../services/storeClassifier';
+import { classifyItemToStore, getStoreIcon, getStoreColor, type Store } from '../services/storeClassifier';
 import { getShoppingRoute, type ShoppingRouteResult } from '../services/gemini';
 import ShoppingRouteModal from '../components/ShoppingRouteModal';
 
@@ -257,24 +257,23 @@ export default function ShoppingList() {
 
     // Sort stores by count
     const sortedStores = Object.entries(storeCounts).sort((a, b) => b[1] - a[1]);
-    let primaryStore = sortedStores[0][0] as Store;
+    const primaryStore = sortedStores[0][0] as Store;
 
-    // Resolve "Any" to a concrete store
+    // First Principles: Efficiency & Direct Access
+    // 1. User wants to see products/buying options immediately -> Google Shopping (tbm=shop).
+    // 2. Remove complexity (no item count logic).
+    // 3. Query optimization: Search for the *category* of goods to get a wide range of results.
+
+    let searchTerm = '';
     if (primaryStore === 'Any') {
-      // 1. Try to find a specific UK supermarket among selected items
-      const fallback = sortedStores.find(([name]) =>
-        UK_SUPERMARKETS.includes(name as any)
-      );
-
-      if (fallback) {
-        primaryStore = fallback[0] as Store;
-      } else {
-        // 2. Default to Tesco if no specific supermarket is present
-        primaryStore = 'Tesco';
-      }
+      searchTerm = 'groceries'; // Generic
+    } else {
+      searchTerm = primaryStore; // Specialty (e.g., "Chinese Supermarket", "Korean Mart")
     }
 
-
+    // Construct Google Shopping URL
+    // tbm=shop triggers the Shopping tab directly
+    const url = `https://www.google.com/search?tbm=shop&q=${encodeURIComponent('buy ' + searchTerm + ' online')}`;
 
     // Open in new tab
     window.open(url, '_blank');
