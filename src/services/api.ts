@@ -59,6 +59,22 @@ export async function getShoppingList(): Promise<import('../types').ShoppingItem
         .order('created_at', { ascending: false });
 
       if (!error && data) {
+        // [Sync Fix] First Principle: Don't lose user data on transition.
+        // If cloud is empty but we have local data, it means we just connected.
+        // We should migrate local data to cloud.
+        if (data.length === 0) {
+          const localData = storage.getShoppingList();
+          if (localData.length > 0) {
+            console.log('🚀 Migrating local data to Supabase...', localData);
+            // Trigger background upload (fire and forget for UI responsiveness, or await if critical)
+            // We reuse setShoppingList logic but explicitly.
+            // Since we are inside getShoppingList, let's call setShoppingList to sync up.
+            // CAUTION: setShoppingList implementation we just wrote calls getListId again. Safe.
+            await setShoppingList(localData);
+            return localData;
+          }
+        }
+
         return data.map((item) => ({
           id: item.id,
           name: item.name,
