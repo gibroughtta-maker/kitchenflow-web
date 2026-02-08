@@ -1,18 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getRecipeDetails, getShoppingList, setShoppingList, getInventory } from '../services/api';
-import type { RecipeDetails, ShoppingItem } from '../types';
+import { getRecipeDetails, getShoppingList, setShoppingList, getInventory, getCravings, setCravings } from '../services/api';
+import type { RecipeDetails, ShoppingItem, Craving } from '../types';
 import RecipeModal from '../components/RecipeModal';
 import NewCravingSlider from '../components/NewCravingSlider';
-
-interface Craving {
-  id: string;
-  name: string;
-  image: string;
-  timeAgo: string;
-  type: 'mic' | 'edit' | 'link';
-  recipe: RecipeDetails | null;
-}
 
 const PLACEHOLDER_IMAGE = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=500&auto=format&fit=crop';
 
@@ -22,24 +13,7 @@ function genId() {
 
 export default function Cravings() {
   const navigate = useNavigate();
-  const [cravings, setCravings] = useState<Craving[]>([
-    {
-      id: '1',
-      name: 'Tom Yum Soup',
-      image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBqjIeIcWjTUHDXKN6AITxK2tCvBvND1W1beXPB2-JKTMdPX3xn7DMbqYr3a2clmKPO4z03xe7lXCfd4ZoyrbPRx3z7BLelBtaG4v7wTQH2WAcezJHDVDy5uGyfYSMjZyrJBaD6PxxWAEdDvrJV18do5qChPLE1br1my6OI_moxQ2f-d9iMrV46tdfyWaxLGz0Zp3K4DKfff1H9fU5eKi0NPL_m341jrzky7gVa20sWcsCsn2Gg9GnDFJPZbxxeAGN7fDwxezcphvqb',
-      timeAgo: '20 mins ago',
-      type: 'mic',
-      recipe: null,
-    },
-    {
-      id: '2',
-      name: 'Avocado Toast',
-      image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAMjl6mlNkwYqU5zIgR9AK8cnUBdaSYsKx5Y5XOy4UL2AKYANLQL1RbiyVCzjm7YetQZGQPik_jjBf1CQ8HzZyEbCLSNjSkn6LsTE9NANRZnveQlhc1aRtOlGQfIgKBMMrQdTX_lwA8GeXco1xJCkdrCjfjDL_cA3mvoFOf9lpADAVHCMYo7xnEgbetMJzzAoS1uBaYOPjPNqKA3acmChRy5NM0Q3TdrqZzA6XZ9X_k6F7NlWsS-7Wm39BOtcF8OULhsnBC1GzIIawB',
-      timeAgo: '1 hour ago',
-      type: 'edit',
-      recipe: null,
-    },
-  ]);
+  const [cravings, setCravingsState] = useState<Craving[]>([]);
   const [selectedRecipe, setSelectedRecipe] = useState<{ details: RecipeDetails; image: string } | null>(null);
   const [loadingRecipeId, setLoadingRecipeId] = useState<string | null>(null);
 
@@ -47,6 +21,20 @@ export default function Cravings() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [batchLoading, setBatchLoading] = useState(false);
   const [batchMessage, setBatchMessage] = useState('');
+
+  // Load cravings on mount
+  useEffect(() => {
+    async function load() {
+      const data = await getCravings();
+      setCravingsState(data);
+    }
+    load();
+  }, []);
+
+  const saveCravings = async (newCravings: Craving[]) => {
+    setCravingsState(newCravings);
+    await setCravings(newCravings);
+  };
 
   const toggleSelection = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -60,23 +48,25 @@ export default function Cravings() {
 
   const addCraving = (name: string, image?: string) => {
     const newCraving: Craving = {
-      id: Date.now().toString(),
+      id: Date.now().toString(), // api.ts will sanitize this to UUID
       name: name,
       image: image || PLACEHOLDER_IMAGE,
       timeAgo: 'Just now',
       type: 'mic',
       recipe: null,
+      addedAt: Date.now(),
     };
-    setCravings([newCraving, ...cravings]);
+    saveCravings([newCraving, ...cravings]);
   };
 
   const deleteCraving = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    setCravings(cravings.filter(c => c.id !== id));
+    const next = cravings.filter(c => c.id !== id);
+    saveCravings(next);
     setSelectedIds(prev => {
-      const next = new Set(prev);
-      next.delete(id);
-      return next;
+      const nextSet = new Set(prev);
+      nextSet.delete(id);
+      return nextSet;
     });
   };
 
@@ -84,8 +74,10 @@ export default function Cravings() {
   const fetchRecipeForCraving = async (craving: Craving): Promise<RecipeDetails | null> => {
     if (craving.recipe) return craving.recipe;
 
+    let details: RecipeDetails | null = null;
+
     if (craving.name === 'Tom Yum Soup') {
-      const details: RecipeDetails = {
+      details = {
         dishName: 'Tom Yum Soup',
         cuisine: 'Thai Cuisine',
         cookingTime: '25 mins',
@@ -102,13 +94,13 @@ export default function Cravings() {
           'Turn off heat. Stir in fish sauce, lime juice, and chili paste immediately.',
         ],
       };
-      setCravings(prev => prev.map(c => c.id === craving.id ? { ...c, recipe: details } : c));
-      return details;
+    } else {
+      details = await getRecipeDetails(craving.name);
     }
 
-    const details = await getRecipeDetails(craving.name);
     if (details) {
-      setCravings(prev => prev.map(c => c.id === craving.id ? { ...c, recipe: details } : c));
+      const updated = cravings.map(c => c.id === craving.id ? { ...c, recipe: details } : c);
+      saveCravings(updated);
     }
     return details;
   };
