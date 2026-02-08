@@ -46,6 +46,8 @@ export async function scanFridge(images: { base64: string; mimeType: string }[])
 
 export async function getShoppingList(): Promise<import('../types').ShoppingItem[]> {
   // 1. 优先直连 Supabase (使用 list_id)
+  // 1. 优先直连 Supabase - TEMPORARY DISABLED: Enable only when setShoppingList supports Supabase
+  /*
   if (isSupabaseConfigured() && supabase) {
     try {
       const listId = await getListId();
@@ -69,6 +71,7 @@ export async function getShoppingList(): Promise<import('../types').ShoppingItem
       console.warn('Supabase direct read failed, falling back:', e);
     }
   }
+  */
 
   // 2. 降级到 API 或本地
   return useBackend() ? backendApi.getShoppingList() : Promise.resolve(storage.getShoppingList());
