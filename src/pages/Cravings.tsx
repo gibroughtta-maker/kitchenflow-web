@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getRecipeDetails, getShoppingList, setShoppingList, getInventory, getCravings, setCravings } from '../services/api';
+import { classifyItemToStore } from '../services/storeClassifier';
 import type { RecipeDetails, ShoppingItem, Craving } from '../types';
 import RecipeModal from '../components/RecipeModal';
 import NewCravingSlider from '../components/NewCravingSlider';
@@ -140,24 +141,32 @@ export default function Cravings() {
       const inPlan = new Set(shoppingList.map(i => i.name.toLowerCase()));
       const inStock = new Set(inventory.map(i => i.name.toLowerCase()));
 
-      const toAdd: ShoppingItem[] = allIngredients
+      const uniqueIngredients = allIngredients
         .filter((name, idx, arr) => arr.indexOf(name) === idx) // unique
         .filter(name => {
           const lower = name.toLowerCase();
           return !inStock.has(lower) && !inPlan.has(lower);
-        })
-        .map(name => ({
-          id: genId(),
-          name,
-          checked: false,
-          addedAt: Date.now(),
-        }));
+        });
 
-      if (toAdd.length === 0) {
+      if (uniqueIngredients.length === 0) {
         setBatchMessage('✅ 所有食材均已在库存或购物清单中');
         setBatchLoading(false);
         return;
       }
+
+      // 4. Intelligent Classification: Assign store to each ingredient
+      const toAdd: ShoppingItem[] = await Promise.all(
+        uniqueIngredients.map(async (name) => {
+          const store = await classifyItemToStore(name);
+          return {
+            id: genId(),
+            name,
+            checked: false,
+            addedAt: Date.now(),
+            store: store, // Auto-classified store
+          };
+        })
+      );
 
       await setShoppingList([...shoppingList, ...toAdd]);
       setSelectedIds(new Set()); // Clear selection

@@ -286,15 +286,28 @@ export async function getCravings(): Promise<import('../types').Craving[]> {
           }
         }
 
-        return data.map((item) => ({
-          id: item.id,
-          name: item.dish_name,
-          image: item.image_url || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=500&auto=format&fit=crop',
-          timeAgo: 'Synced',
-          type: item.source_type as any || 'mic',
-          recipe: item.recipe_data || null,
-          addedAt: new Date(item.created_at).getTime(),
-        }));
+        return data.map((item) => {
+          // Try to parse recipe from 'note' column if it stores JSON, 
+          // or fallback to constructing it from flattened fields if 'note' is just a string or empty.
+          let recipe = null;
+          if (item.note && item.note.startsWith('{')) {
+            try {
+              recipe = JSON.parse(item.note);
+            } catch (e) {
+              console.warn('Failed to parse recipe from note:', e);
+            }
+          }
+
+          return {
+            id: item.id,
+            name: item.name, // Fixed: dish_name -> name
+            image: item.image_url || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=500&auto=format&fit=crop',
+            timeAgo: 'Synced',
+            type: (item.source as any) || 'mic', // Fixed: source_type -> source
+            recipe: recipe, // Fixed: recipe_data -> parsed from note
+            addedAt: new Date(item.created_at).getTime(),
+          };
+        });
       }
     } catch (e) {
       console.warn('Supabase direct read failed (Cravings), falling back:', e);
@@ -333,10 +346,10 @@ export async function setCravings(items: import('../types').Craving[]): Promise<
           sanitizedItems.map(item => ({
             id: item.id,
             device_id: deviceId,
-            dish_name: item.name,
+            name: item.name, // Fixed: dish_name -> name
             image_url: item.image,
-            source_type: item.type,
-            recipe_data: item.recipe,
+            source: item.type, // Fixed: source_type -> source
+            note: item.recipe ? JSON.stringify(item.recipe) : null, // Fixed: recipe_data -> note (JSON)
             created_at: item.addedAt ? new Date(item.addedAt).toISOString() : new Date().toISOString(),
           }))
         );
