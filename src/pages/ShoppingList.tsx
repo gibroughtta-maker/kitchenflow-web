@@ -286,11 +286,21 @@ export default function ShoppingList() {
     setRouteResult(null);
 
     // 2. Get unique stores from selected items
-    const stores = Array.from(new Set(selectedItems.map(i => i.store || 'Any')))
-      .filter(s => s !== 'Any');
+    const uniqueStores = new Set(selectedItems.map(i => i.store || 'Any'));
+    const targetStores: string[] = [];
 
-    // If no specific stores, just search generic
-    const targetStores = stores.length > 0 ? stores : ['Supermarket'];
+    // Add specific stores
+    uniqueStores.forEach(s => {
+      if (s !== 'Any') targetStores.push(s);
+    });
+
+    // If 'Any' exists, add a generic Supermarket stop
+    if (uniqueStores.has('Any')) {
+      targetStores.push('Supermarket');
+    }
+
+    // Fallback if nothing selected (shouldn't happen given input check)
+    if (targetStores.length === 0) targetStores.push('Supermarket');
 
     // 3. Get User Location
     if (!navigator.geolocation) {

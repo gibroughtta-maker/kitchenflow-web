@@ -46,7 +46,7 @@ const SPECIALTY_STORE_MAP: Record<string, string[]> = {
         '五香粉', '十三香', '八角', '桂皮', '花椒', '干辣椒', '白胡椒',
         'lao gan ma', 'doubanjiang', 'pixian douban', 'chili oil',
         'shaoxing wine', 'chinese cooking wine', 'sichuan peppercorn',
-        'five spice', 'star anise', 'chinese cinnamon',
+        'five spice', 'star anise', 'chinese cinnamon', 'dried chili', 'dry chili',
         // 主食 Staples
         '饺子', '馄饨', '包子', '小笼包', '春卷', '烧麦', '锅贴',
         '年糕', '粉丝', '粉条', '河粉', '米线', '手擀面', '刀削面',
@@ -57,9 +57,9 @@ const SPECIALTY_STORE_MAP: Record<string, string[]> = {
         'chinese tofu', 'doufu', 'bean curd skin', 'dried tofu',
         // 蔬菜 Vegetables
         '白菜', '小白菜', '青菜', '芥兰', '韭菜', '蒜苔', '茼蒿',
-        '冬瓜', '苦瓜', '丝瓜', '空心菜', '茭白', '莲藕',
+        '冬瓜', '苦瓜', '丝瓜', '空心菜', '茭白', '莲藕', '豆芽',
         'bok choy', 'pak choi', 'chinese cabbage', 'gai lan', 'chinese chives',
-        'bitter melon', 'winter melon', 'loofah', 'water spinach',
+        'bitter melon', 'winter melon', 'loofah', 'water spinach', 'bean sprout',
         // 蛋类 Eggs
         '皮蛋', '咸蛋', '咸鸭蛋', '松花蛋', '茶叶蛋',
         'century egg', 'preserved egg', 'salted duck egg',
