@@ -287,7 +287,7 @@ export default function Cravings() {
               ) : (
                 <>
                   <span className="material-symbols-outlined text-lg">shopping_cart</span>
-                  Add ingredients for {selectedIds.size} dishes to shopping list
+                  Add missing ingredients for {selectedIds.size} dishes to shopping list
                 </>
               )}
             </button>
