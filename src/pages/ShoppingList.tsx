@@ -4,7 +4,7 @@ import { getShoppingList, setShoppingList } from '../services/api';
 import { supabase } from '../services/supabaseClient';
 import type { ShoppingItem } from '../types';
 import NewCravingSlider from '../components/NewCravingSlider';
-import { classifyItemToStore, getStoreIcon, getStoreColor, getStoreUrl, type Store } from '../services/storeClassifier';
+import { classifyItemToStore, getStoreIcon, getStoreColor, getStoreUrl, type Store, UK_SUPERMARKETS } from '../services/storeClassifier';
 import { getShoppingRoute, type ShoppingRouteResult } from '../services/gemini';
 import ShoppingRouteModal from '../components/ShoppingRouteModal';
 
@@ -257,7 +257,22 @@ export default function ShoppingList() {
 
     // Sort stores by count
     const sortedStores = Object.entries(storeCounts).sort((a, b) => b[1] - a[1]);
-    const primaryStore = sortedStores[0][0] as Store;
+    let primaryStore = sortedStores[0][0] as Store;
+
+    // Resolve "Any" to a concrete store
+    if (primaryStore === 'Any') {
+      // 1. Try to find a specific UK supermarket among selected items
+      const fallback = sortedStores.find(([name]) =>
+        UK_SUPERMARKETS.includes(name as any)
+      );
+
+      if (fallback) {
+        primaryStore = fallback[0] as Store;
+      } else {
+        // 2. Default to Tesco if no specific supermarket is present
+        primaryStore = 'Tesco';
+      }
+    }
 
     // Determine query
     // If only 1 item, search for it directly
