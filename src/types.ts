@@ -49,3 +49,12 @@ export interface InventoryItem {
   location: 'fridge' | 'freezer' | 'pantry' | string;
   addedAt: number;
 }
+export interface Craving {
+  id: string;
+  name: string;
+  image: string;
+  timeAgo: string;
+  type: 'mic' | 'edit' | 'link';
+  recipe: RecipeDetails | null;
+  addedAt?: number; // Optional for compatibility / sorting
+}
