@@ -5,7 +5,7 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY?.trim();
 
 let supabaseClient: SupabaseClient | null = null;
 
@@ -33,14 +33,21 @@ export function isSupabaseConfigured(): boolean {
 export function getDeviceId(): string {
     const KEY = 'kitchenflow_device_id';
     let deviceId = localStorage.getItem(KEY);
-    if (!deviceId) {
+
+    // Validate if existing ID is a UUID (simple check)
+    const isUUID = (str: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
+
+    if (!deviceId || !isUUID(deviceId)) {
         // Use crypto.randomUUID() for valid UUID generation
         if (typeof crypto !== 'undefined' && crypto.randomUUID) {
             deviceId = crypto.randomUUID();
         } else {
-            // Fallback for older browsers (unlikely) - simple random string
-            // Note: This might still fail if DB strictly requires UUID type
-            deviceId = `web_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+            // Fallback for environments without crypto.randomUUID (e.g. older browsers/test)
+            // RFC4122 version 4 compliant UUID generator
+            deviceId = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+                var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
         }
         localStorage.setItem(KEY, deviceId);
     }
