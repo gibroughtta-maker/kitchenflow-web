@@ -1,37 +1,55 @@
-# KitchenFlow Web 端（移动端优先）
+# KitchenFlow
 
-在浏览器中实现 KitchenFlow 全部核心功能：冰箱扫描、想吃分析、购物清单、库存管理。  
-**设计参照**：`stitch_fridge_scan_results` 设计稿（液态玻璃、沉浸式背景、底部 Tab、扫描结果卡片与状态标签）。
+**A mobile-first AI kitchen assistant for home cooks.** Photograph your fridge, and KitchenFlow identifies the ingredients and how fresh they are, works out what you need for the dish you want to cook, and turns the missing ingredients into a shopping list.
 
-## 功能（移动 Web 布局）
+KitchenFlow was first prototyped as a native mobile app; this repository is the web version, built mobile-first for the phone browser.
 
-- **布局**：沉浸式深色背景 + 顶部标题栏 + 底部 Tab（首页 / 扫描 / 想吃 / 购物 / 库存）
-- **首页**：一句话介绍 + 上传扫描入口 + 想吃 / 购物 / 库存三宫格
-- **扫描**：上传 1～5 张照片 → 选择存储位置 → AI 识别食材与新鲜度 → 扫描结果
-- **扫描结果**：按新鲜度分组展示，支持「保存到库存」「加入购物清单」
-- **想吃**：输入菜名 → AI 分析食材与菜谱 → 缺失食材一键加入购物清单
-- **购物清单**：增删改、勾选、清除已勾选（数据存 localStorage）
-- **库存**：按冰箱/冷冻/ pantry 筛选，删除（数据存 localStorage）
+<!-- Add screenshots here: home, scan results grouped by freshness, craving analysis, shopping list -->
 
-## 环境
+## What it does
 
-1. Node 18+
-2. 复制 `.env.example` 为 `.env`，填入 `VITE_GEMINI_API_KEY`（[Google AI Studio](https://aistudio.google.com/apikey) 获取）
+| Screen | Capability |
+|---|---|
+| **Scan** | Upload 1–5 photos of a fridge, freezer or pantry; Gemini vision identifies each ingredient and estimates its freshness |
+| **Scan results** | Ingredients grouped by freshness, with one tap to save to inventory or add to the shopping list |
+| **Cravings** | Type a dish; AI breaks it into ingredients and a recipe, and the missing ingredients go to the shopping list in one tap |
+| **Shopping list** | Add, edit, tick off and clear items; store preference and shopping-route view |
+| **Inventory** | Filter by fridge / freezer / pantry and remove used items |
 
-## 运行
+## Architecture
+
+```mermaid
+flowchart LR
+  P[Phone browser<br/>React + Vite] -->|photos| G[Gemini vision<br/>ingredients + freshness]
+  P -->|dish name| G2[Gemini text<br/>recipe + ingredient list]
+  P --> S[(Browser storage<br/>or Supabase)]
+  P -.optional.-> B[Backend API<br/>VITE_USE_BACKEND]
+```
+
+The app runs standalone (Gemini + browser storage) or against a backend API when `VITE_USE_BACKEND=true`, so the same frontend works as a quick demo or a full deployment.
+
+## Tech stack
+
+React · TypeScript · Vite · Tailwind CSS · React Router · Google Gemini (`@google/genai`) · Supabase · Vercel
+
+## Run locally
+
+Requirements: Node.js 18+
 
 ```bash
-cd kitchenflow-web
+cp .env.example .env    # add VITE_GEMINI_API_KEY and Supabase values
 npm install
 npm run dev
 ```
 
-浏览器打开终端提示的地址（如 http://localhost:5173）。
-
-## 构建
+Build for static hosting:
 
 ```bash
-npm run build
+npm run build           # output in dist/
 ```
 
-产物在 `dist/`，可部署到 Vercel、Netlify 等静态托管。
+> **Note:** in standalone mode the Gemini key is used from the browser, which is fine for a personal demo. For a public deployment, set `VITE_USE_BACKEND=true` so AI calls go through the backend and the key stays server-side.
+
+## Author
+
+Designed and built by **Dong Wang**.
